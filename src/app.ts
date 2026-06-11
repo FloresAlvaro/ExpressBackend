@@ -2,11 +2,21 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import userRoutes from './modules/users/users.routes.js';
 import { logger } from './helper/logger.js';
+import { config, validateConfig } from './config/config.js';
+import { ApiResponse } from './utils/response.js';
+import { AppError } from './errors/AppError.js';
 
 dotenv.config();
 
+// Validar configuración
+try {
+  validateConfig();
+} catch (error) {
+  logger.error(error, 'Error en configuración');
+  process.exit(1);
+}
+
 const app: Application = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware de logging para todas las requests
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -17,15 +27,15 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Middleware
-app.use(express.json());
+// Middleware de parseo JSON
+app.use(express.json({ limit: config.maxRequestSize }));
 
 // Rutas
-app.use('/api/users', userRoutes);
+app.use(`/api/${config.apiVersion}/users`, userRoutes);
 
 app.get('/health', (req: Request, res: Response) => {
   logger.debug('Endpoint /health consultado');
-  res.status(200).json({ status: 'Server is running with TypeScript' });
+  return ApiResponse.success(res, { status: 'Server is running with TypeScript' }, 200, 'Health check');
 });
 
 // Middleware para rutas no encontradas (404)
@@ -34,18 +44,36 @@ app.use((req: Request, res: Response) => {
     { method: req.method, path: req.path },
     'Ruta no encontrada (404)'
   );
-  res.status(404).json({ message: 'Ruta no encontrada' });
+  return ApiResponse.notFound(res, 'Ruta no encontrada');
 });
 
 // Middleware de manejo de errores global
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  // Manejo de errores de aplicación
+  if (err instanceof AppError) {
+    logger.warn(
+      { error: err.message, code: err.code, statusCode: err.statusCode },
+      'Error de aplicación'
+    );
+    return ApiResponse.error(
+      res,
+      err.message,
+      err.statusCode,
+      err.code
+    );
+  }
+
+  // Manejo de errores genéricos
   logger.error(
     { error: err.message, stack: err.stack, path: req.path },
     'Error no manejado en la aplicación'
   );
-  res.status(500).json({ message: 'Error interno del servidor' });
+  return ApiResponse.internalError(res);
 });
 
-app.listen(PORT, () => {
-  logger.info({ port: PORT }, '🚀 Servidor iniciado correctamente');
+app.listen(config.port, () => {
+  logger.info(
+    { port: config.port, environment: config.environment },
+    '🚀 Servidor iniciado correctamente'
+  );
 });
