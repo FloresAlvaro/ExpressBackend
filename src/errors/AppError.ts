@@ -2,12 +2,17 @@
  * Clase base para todos los errores de la aplicación
  */
 export class AppError extends Error {
+  public statusCode: number;
+  public code: string;
+
   constructor(
     public message: string,
-    public statusCode: number = 500,
-    public code: string = 'INTERNAL_ERROR'
+    statusCode: number = 500,
+    code: string = 'INTERNAL_ERROR'
   ) {
     super(message);
+    this.statusCode = statusCode;
+    this.code = code;
     this.name = this.constructor.name;
     Error.captureStackTrace(this, this.constructor);
   }

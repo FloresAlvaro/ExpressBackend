@@ -1,13 +1,13 @@
-import { User, CreateUserData, UpdateUserData } from "./users.interface.js";
-import { logger } from "../../helper/logger.js";
+import { User, CreateUserData, UpdateUserData } from './users.interface.js';
+import { logger } from '../../helper/logger.js';
 
 // Tipamos el array de la BD simulada
 let usersDatabase: User[] = [
-  { id: 1, name: "Alvaro Flores", email: "alvaro@example.com", isActive: true },
+  { id: 1, name: 'Alvaro Flores', email: 'alvaro@example.com', isActive: true },
   {
     id: 2,
-    name: "Mariana Costa",
-    email: "mariana@example.com",
+    name: 'Mariana Costa',
+    email: 'mariana@example.com',
     isActive: true,
   },
 ];
@@ -18,23 +18,23 @@ const simulateDbDelay = async (): Promise<void> => {
 };
 
 // 1. Obtener solo usuarios activos
-export const getAllUsers = async (status?: "active" | "inactive" | "all"): Promise<User[]> => {
+export const getAllUsers = async (status?: 'active' | 'inactive' | 'all'): Promise<User[]> => {
   try {
     await simulateDbDelay();
-    logger.info({ status }, "Obteniendo usuarios");
+    logger.info({ status }, 'Obteniendo usuarios');
 
-    if (status === "all") {
+    if (status === 'all') {
       return usersDatabase;
     }
 
-    if (status === "inactive") {
+    if (status === 'inactive') {
       return usersDatabase.filter((user) => !user.isActive);
     }
 
     // Por defecto (si es 'active' o si no viene el parámetro), devolvemos los activos
     return usersDatabase.filter((user) => user.isActive);
   } catch (error) {
-    logger.error({ error }, "Error en getAllUsers");
+    logger.error({ error }, 'Error en getAllUsers');
     throw error;
   }
 };
@@ -49,13 +49,10 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
       isActive: true, // Todo usuario inicia activo
     };
     usersDatabase.push(newUser);
-    logger.info(
-      { userId: newUser.id, email: newUser.email },
-      "Usuario creado exitosamente",
-    );
+    logger.info({ userId: newUser.id, email: newUser.email }, 'Usuario creado exitosamente');
     return newUser;
   } catch (error) {
-    logger.error({ error }, "Error en createUser");
+    logger.error({ error }, 'Error en createUser');
     throw error;
   }
 };
@@ -66,15 +63,15 @@ export const updateUser = async (id: number, data: UpdateUserData): Promise<User
     await simulateDbDelay();
     const index = usersDatabase.findIndex((u) => u.id === id && u.isActive);
     if (index === -1) {
-      logger.warn({ userId: id }, "Intento de actualizar usuario no encontrado");
+      logger.warn({ userId: id }, 'Intento de actualizar usuario no encontrado');
       return null;
     }
 
     usersDatabase[index] = { ...usersDatabase[index], ...data };
-    logger.info({ userId: id }, "Usuario actualizado exitosamente");
+    logger.info({ userId: id }, 'Usuario actualizado exitosamente');
     return usersDatabase[index];
   } catch (error) {
-    logger.error({ error }, "Error en updateUser");
+    logger.error({ error }, 'Error en updateUser');
     throw error;
   }
 };
@@ -85,15 +82,15 @@ export const softDeleteUser = async (id: number): Promise<boolean> => {
     await simulateDbDelay();
     const index = usersDatabase.findIndex((u) => u.id === id && u.isActive);
     if (index === -1) {
-      logger.warn({ userId: id }, "Intento de eliminar usuario no encontrado");
+      logger.warn({ userId: id }, 'Intento de eliminar usuario no encontrado');
       return false;
     }
 
     usersDatabase[index].isActive = false;
-    logger.info({ userId: id }, "Usuario eliminado (soft delete)");
+    logger.info({ userId: id }, 'Usuario eliminado (soft delete)');
     return true;
   } catch (error) {
-    logger.error({ error }, "Error en softDeleteUser");
+    logger.error({ error }, 'Error en softDeleteUser');
     throw error;
   }
 };
@@ -105,18 +102,15 @@ export const restoreUser = async (id: number): Promise<User | null> => {
     const index = usersDatabase.findIndex((u) => u.id === id && !u.isActive);
 
     if (index === -1) {
-      logger.warn(
-        { userId: id },
-        "Intento de restaurar usuario no encontrado o ya activo",
-      );
+      logger.warn({ userId: id }, 'Intento de restaurar usuario no encontrado o ya activo');
       return null;
     }
 
     usersDatabase[index].isActive = true;
-    logger.info({ userId: id }, "Usuario restaurado exitosamente");
+    logger.info({ userId: id }, 'Usuario restaurado exitosamente');
     return usersDatabase[index];
   } catch (error) {
-    logger.error({ error }, "Error en restoreUser");
+    logger.error({ error }, 'Error en restoreUser');
     throw error;
   }
 };

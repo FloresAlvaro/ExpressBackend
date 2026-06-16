@@ -8,10 +8,11 @@ import { ApiResponse } from './response.js';
  * Centraliza el manejo de errores y logging
  */
 export const asyncHandler = (
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
+  // eslint-disable-next-line no-unused-vars
+  fn: (_req: Request, _res: Response, _next: NextFunction) => Promise<Response | void>
 ) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    return Promise.resolve(fn(req, res, next)).catch((error: Error) => {
+  return (_req: Request, _res: Response, _next: NextFunction) => {
+    return Promise.resolve(fn(_req, _res, _next)).catch((error: Error) => {
       // Log del error
       if (error instanceof AppError) {
         logger.warn(
@@ -27,16 +28,11 @@ export const asyncHandler = (
 
       // Manejo del error
       if (error instanceof AppError) {
-        return ApiResponse.error(
-          res,
-          error.message,
-          error.statusCode,
-          error.code
-        );
+        return ApiResponse.error(_res, error.message, error.statusCode, error.code);
       }
 
       // Error genérico
-      return ApiResponse.internalError(res);
+      return ApiResponse.internalError(_res);
     });
   };
 };

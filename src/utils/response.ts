@@ -9,6 +9,12 @@ export interface SuccessResponse<T> {
   data: T;
 }
 
+interface ValidationError {
+  field: string;
+  message: string;
+  code: string;
+}
+
 /**
  * Interfaz para respuestas de error
  */
@@ -16,7 +22,7 @@ export interface ErrorResponse {
   status: 'error';
   message: string;
   code?: string;
-  errors?: any[];
+  errors?: ValidationError[];
 }
 
 /**
@@ -47,7 +53,7 @@ export class ApiResponse {
     message: string,
     status: number = 500,
     code?: string,
-    errors?: any[]
+    errors?: ValidationError[]
   ): Response {
     return res.status(status).json({
       status: 'error',
@@ -60,10 +66,7 @@ export class ApiResponse {
   /**
    * Envía un error 404 (No encontrado)
    */
-  static notFound(
-    res: Response,
-    message: string = 'Recurso no encontrado'
-  ): Response {
+  static notFound(res: Response, message: string = 'Recurso no encontrado'): Response {
     return this.error(res, message, 404, 'NOT_FOUND');
   }
 
@@ -73,7 +76,7 @@ export class ApiResponse {
   static badRequest(
     res: Response,
     message: string = 'Solicitud inválida',
-    errors?: any[]
+    errors?: ValidationError[]
   ): Response {
     return this.error(res, message, 400, 'BAD_REQUEST', errors);
   }
@@ -81,30 +84,21 @@ export class ApiResponse {
   /**
    * Envía un error 409 (Conflicto)
    */
-  static conflict(
-    res: Response,
-    message: string = 'Conflicto'
-  ): Response {
+  static conflict(res: Response, message: string = 'Conflicto'): Response {
     return this.error(res, message, 409, 'CONFLICT');
   }
 
   /**
    * Envía un error 403 (Acceso denegado)
    */
-  static forbidden(
-    res: Response,
-    message: string = 'Acceso denegado'
-  ): Response {
+  static forbidden(res: Response, message: string = 'Acceso denegado'): Response {
     return this.error(res, message, 403, 'FORBIDDEN');
   }
 
   /**
    * Envía un error 500 (Error interno del servidor)
    */
-  static internalError(
-    res: Response,
-    message: string = 'Error interno del servidor'
-  ): Response {
+  static internalError(res: Response, message: string = 'Error interno del servidor'): Response {
     return this.error(res, message, 500, 'INTERNAL_ERROR');
   }
 }
