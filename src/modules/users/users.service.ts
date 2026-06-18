@@ -3,11 +3,28 @@ import { logger } from '../../helper/logger.js';
 
 // Tipamos el array de la BD simulada
 let usersDatabase: User[] = [
-  { id: 1, name: 'Alvaro Flores', email: 'alvaro@example.com', isActive: true },
+  {
+    id: 1,
+    firstName: 'Alvaro',
+    lastName: 'Flores',
+    identificationNumber: '12345678',
+    dateOfBirth: new Date('1990-01-15'),
+    email: 'alvaro@example.com',
+    phoneNumber: '+1 234-567-8900',
+    createdAt: new Date('2024-01-10T08:30:00'),
+    updatedAt: new Date('2024-01-10T08:30:00'),
+    isActive: true,
+  },
   {
     id: 2,
-    name: 'Mariana Costa',
+    firstName: 'Mariana',
+    lastName: 'Costa',
+    identificationNumber: '87654321',
+    dateOfBirth: new Date('1992-05-20'),
     email: 'mariana@example.com',
+    phoneNumber: '+1 987-654-3210',
+    createdAt: new Date('2024-02-15T10:15:00'),
+    updatedAt: new Date('2024-02-15T10:15:00'),
     isActive: true,
   },
 ];
@@ -43,9 +60,12 @@ export const getAllUsers = async (status?: 'active' | 'inactive' | 'all'): Promi
 export const createUser = async (userData: CreateUserData): Promise<User> => {
   try {
     await simulateDbDelay();
+    const now = new Date();
     const newUser: User = {
       id: usersDatabase.length + 1,
       ...userData,
+      createdAt: now, // Fecha y hora de creación
+      updatedAt: now, // Inicialmente igual a createdAt
       isActive: true, // Todo usuario inicia activo
     };
     usersDatabase.push(newUser);
@@ -67,7 +87,12 @@ export const updateUser = async (id: number, data: UpdateUserData): Promise<User
       return null;
     }
 
-    usersDatabase[index] = { ...usersDatabase[index], ...data };
+    // Actualizar solo updatedAt, createdAt nunca cambia
+    usersDatabase[index] = {
+      ...usersDatabase[index],
+      ...data,
+      updatedAt: new Date(), // Siempre actualiza la fecha de modificación
+    };
     logger.info({ userId: id }, 'Usuario actualizado exitosamente');
     return usersDatabase[index];
   } catch (error) {

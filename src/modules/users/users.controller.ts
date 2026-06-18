@@ -17,9 +17,23 @@ export const getUsers = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const createUserController = asyncHandler(async (req: Request, res: Response) => {
-  const { name, email }: CreateUserData = req.body;
+  const {
+    firstName,
+    lastName,
+    identificationNumber,
+    dateOfBirth,
+    email,
+    phoneNumber,
+  }: CreateUserData = req.body;
 
-  const newUser = await userService.createUser({ name, email });
+  const newUser = await userService.createUser({
+    firstName,
+    lastName,
+    identificationNumber,
+    dateOfBirth,
+    email,
+    phoneNumber,
+  });
   logger.info({ userId: newUser.id, email: newUser.email }, 'Usuario creado exitosamente');
   return ApiResponse.success(res, newUser, 201, 'Usuario creado exitosamente');
 });
